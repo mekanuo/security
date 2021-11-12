@@ -36,15 +36,20 @@ public class SecurityConfigByUser extends WebSecurityConfigurerAdapter {
     public void configure(HttpSecurity httpSecurity) throws Exception {
         //配置无权限跳转页面
         httpSecurity.exceptionHandling().accessDeniedPage("/unAuth.html");
+
         httpSecurity.formLogin()    //自定义自己编写的登录页面
                 .loginPage("/login.html")    //登录页面设置
                 .loginProcessingUrl("/user/login")   //security默认的登录访问路径
-                .defaultSuccessUrl("/index").permitAll()    //登录成功后跳转路径
+//                .defaultSuccessUrl("/index").permitAll()    //登录成功后跳转路径
+                .defaultSuccessUrl("/success.html").permitAll()    //登录成功后跳转页面
                 .and().authorizeRequests()
 //                .antMatchers("/hello").hasAuthority("12312312312")
                 .antMatchers("/user/login").permitAll() //配置白名单
                 .anyRequest().authenticated()
                 .and().csrf().disable();    //关闭CSRF防护
+
+        //配置退出成功后页面
+        httpSecurity.logout().logoutUrl("/logout").logoutSuccessUrl("/login.html").permitAll();
     }
 
     @Bean

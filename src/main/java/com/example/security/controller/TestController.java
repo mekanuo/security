@@ -25,6 +25,11 @@ public class TestController {
         return "hello security";
     }
 
+    @GetMapping("/login/success")
+    public String success(){
+        return "success";
+    }
+
     @GetMapping("index")
     @ResponseBody
     public String index(){
