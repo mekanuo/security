@@ -9,6 +9,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+
+import javax.sql.DataSource;
 
 /**
  * @Auther: YDUI01
@@ -26,6 +30,25 @@ public class SecurityConfigByUser extends WebSecurityConfigurerAdapter {
      */
     @Autowired
     private MyUserDetailsService myUserDetailsService;
+
+    /**
+     * 注入数据源
+     */
+    @Autowired
+    private DataSource dataSource;
+
+    /**
+     * 配置对象
+     * @return
+     */
+    @Bean
+    public PersistentTokenRepository persistentTokenRepository(){
+        JdbcTokenRepositoryImpl jdbcTokenRepository = new JdbcTokenRepositoryImpl();
+        jdbcTokenRepository.setDataSource(dataSource);
+        //设置自动创建自动登录表，不设置的话需要手动创建表(创建后再次创建代码会报错--沙雕)；
+        jdbcTokenRepository.setCreateTableOnStartup(false);
+        return jdbcTokenRepository;
+    }
 
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -46,6 +69,9 @@ public class SecurityConfigByUser extends WebSecurityConfigurerAdapter {
 //                .antMatchers("/hello").hasAuthority("12312312312")
                 .antMatchers("/user/login").permitAll() //配置白名单
                 .anyRequest().authenticated()
+                //配置开启自动登录-token有效期60S-自动登录配置的server是userDetailsService
+                .and().rememberMe().tokenRepository(persistentTokenRepository())
+                .tokenValiditySeconds(60).userDetailsService(userDetailsService())
                 .and().csrf().disable();    //关闭CSRF防护
 
         //配置退出成功后页面
