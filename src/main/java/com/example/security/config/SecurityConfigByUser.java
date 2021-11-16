@@ -57,25 +57,42 @@ public class SecurityConfigByUser extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(HttpSecurity httpSecurity) throws Exception {
-        //配置无权限跳转页面
-        httpSecurity.exceptionHandling().accessDeniedPage("/unAuth.html");
+        //配置url访问权限
+        httpSecurity.authorizeRequests()
+                .antMatchers("/").permitAll()
+                        .antMatchers("**update**").permitAll()
+                        .antMatchers("**/login/**").permitAll()
+                        .anyRequest().authenticated();
 
-        httpSecurity.formLogin()    //自定义自己编写的登录页面
-                .loginPage("/login.html")    //登录页面设置
-                .loginProcessingUrl("/user/login")   //security默认的登录访问路径
-//                .defaultSuccessUrl("/index").permitAll()    //登录成功后跳转路径
-                .defaultSuccessUrl("/success.html").permitAll()    //登录成功后跳转页面
-                .and().authorizeRequests()
-//                .antMatchers("/hello").hasAuthority("12312312312")
-                .antMatchers("/user/login").permitAll() //配置白名单
-                .anyRequest().authenticated()
-                //配置开启自动登录-token有效期60S-自动登录配置的server是userDetailsService
-                .and().rememberMe().tokenRepository(persistentTokenRepository())
-                .tokenValiditySeconds(60).userDetailsService(userDetailsService())
-                .and().csrf().disable();    //关闭CSRF防护
+        //关闭CSRF防护
+        httpSecurity.csrf().disable();
+
+        //使用自定义登录窗口
+        httpSecurity.formLogin()
+                .loginPage("/userLogin").permitAll()
+                .usernameParameter("username").passwordParameter("password")
+                .defaultSuccessUrl("/")
+                .failureUrl("/userLogin?error");
+
+        //配置无权限跳转页面
+//        httpSecurity.exceptionHandling().accessDeniedPage("/unAuth.html");
+//
+//        httpSecurity.formLogin()    //自定义自己编写的登录页面
+//                .loginPage("/login.html")    //登录页面设置
+//                .loginProcessingUrl("/user/login")   //security默认的登录访问路径
+////                .defaultSuccessUrl("/index").permitAll()    //登录成功后跳转路径
+//                .defaultSuccessUrl("/success.html").permitAll()    //登录成功后跳转页面
+//                .and().authorizeRequests()
+////                .antMatchers("/hello").hasAuthority("12312312312")
+//                .antMatchers("/user/login").permitAll() //配置白名单
+//                .anyRequest().authenticated()
+//                //配置开启自动登录-token有效期60S-自动登录配置的server是userDetailsService
+//                .and().rememberMe().tokenRepository(persistentTokenRepository())
+//                .tokenValiditySeconds(60).userDetailsService(userDetailsService())
+//                .and().csrf().disable();    //关闭CSRF防护
 
         //配置退出成功后页面
-        httpSecurity.logout().logoutUrl("/logout").logoutSuccessUrl("/login.html").permitAll();
+//        httpSecurity.logout().logoutUrl("/logout").logoutSuccessUrl("/login.html").permitAll();
     }
 
     @Bean

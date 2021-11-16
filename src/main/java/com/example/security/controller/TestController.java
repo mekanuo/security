@@ -25,6 +25,11 @@ public class TestController {
         return "hello security";
     }
 
+    @GetMapping("userLogin")
+    public String userLogin(){
+        return "login/login";
+    }
+
     @GetMapping("/login/success")
     public String success(){
         return "success";
